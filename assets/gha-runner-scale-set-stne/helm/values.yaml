@@ -1,0 +1,9 @@
+externalsecrets:
+  items:
+    - org: my-org
+      path: arc-system
+
+runnerScaleSet:
+  runnerScaleSetName: "runner-scale-set"
+  githubConfigUrl: "https://github.com/bastet-cat"
+  githubConfigSecret: gha-runner-scale-set-my-org-secrets
