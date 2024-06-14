@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: arc-runners
+spec:
+  generators:
+    - matrix:
+        generators:
+          - list:
+              elements:
+                - name: bastet-cat
+          - list:
+              elements:
+              - cluster: in-cluster
+                cluster-url: https://kubernetes.default.svc
+                prefix: gha-runner-scale-set-controller
+                environment: stg
+                flavour: small
+  template:
+    metadata:
+      name: '{{name}}-runners-{{environment}}-{{flavour}}'
+      finalizers:
+      - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      sources:
+      - repoURL: 'https://github.com/bastet-cat/kind-kubernetes-for-poc.git'
+        targetRevision: 'feat/argocd'
+        ref: values
+      - repoURL: 'https://github.com/bastet-cat/kind-kubernetes-for-poc.git'
+        targetRevision: 'feat/argocd'
+        path: assets/gha-runner-scale-set-stne/helm
+        helm:
+          parameters:
+          - name: runnerScaleSet.githubConfigUrl
+            value: "https://github.com/bastet-cat"
+          - name: runnerScaleSet.runnerScaleSetName
+            value: "{{ flavour }}-runner-scale-set-{{ environment }}"
+          valueFiles:
+          - '$values/applications.d/gha-runner-scale-set/values.yaml'
+      destination:
+        name: '{{ cluster }}'
+        namespace: 'arc-runners'
+      syncPolicy:
+        automated:
+          selfHeal: true
+        syncOptions:
+          - ServerSideApply=true
+          - CreateNamespace=true

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: vault-unseal-cronjob
+description: A Helm chart to deploy a CronJob for unsealing Vault.
+version: 0.1.0
+appVersion: "1.0"

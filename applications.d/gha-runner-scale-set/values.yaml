@@ -1,0 +1,60 @@
+## name of the runner scale set to create.  Defaults to the helm release nameexternalsecrets:
+externalsecrets:
+  items:
+    - org: bastet-cat
+      path: arc-system
+
+runnerScaleSet:
+  runnerScaleSetName: "runner-scale-set"
+  githubConfigUrl: "https://github.com/bastet-cat"
+  githubConfigSecret: gh-runners-bastet-cat-secrets
+  template:
+    spec:
+      initContainers:
+      - name: init-dind-externals
+        image: ghcr.io/actions/actions-runner:latest
+        command: ["cp", "-r", "-v", "/home/runner/externals/.", "/home/runner/tmpDir/"]
+        volumeMounts:
+          - name: dind-externals
+            mountPath: /home/runner/tmpDir
+      containers:
+      - name: runner
+        image: ghcr.io/actions/actions-runner:latest
+        command: ["/home/runner/run.sh"]
+        env:
+          - name: DOCKER_HOST
+            value: unix:///var/run/docker.sock
+        volumeMounts:
+          - name: work
+            mountPath: /home/runner/_work
+          - name: dind-sock
+            mountPath: /var/run
+      - name: dind
+        image: docker:dind
+        args:
+          - dockerd
+          - --host=unix:///var/run/docker.sock
+          - --group=$(DOCKER_GROUP_GID)
+        env:
+          - name: DOCKER_GROUP_GID
+            value: "123"
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - name: work
+            mountPath: /home/runner/_work
+          - name: dind-sock
+            mountPath: /var/run
+          - name: dind-externals
+            mountPath: /home/runner/externals
+      volumes:
+      - name: work
+        emptyDir: {}
+      - name: dind-sock
+        emptyDir: {}
+      - name: dind-externals
+        emptyDir: {}
+  controllerServiceAccount:
+    namespace: arc-system
+    name: bastet-cat-controller-stg-gha-rs-controller
+

@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: external-secrets-operator
+  namespace: argo-cd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/bastet-cat/kind-kubernetes-for-poc.git'
+    targetRevision: 'feat/argocd'
+    path: assets/external-secrets-operator-stno/helm
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: 'external-secrets'
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

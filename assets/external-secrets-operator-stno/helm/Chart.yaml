@@ -1,0 +1,9 @@
+apiVersion: v2
+name: external-secrets-operator-stne
+version: 1.0.0
+description: A Helm chart for deploying external-secrets-operator-stno
+appVersion: 1.0.0
+dependencies:
+  - name: external-secrets
+    version: 0.10.2
+    repository: oci://ghcr.io/external-secrets/charts

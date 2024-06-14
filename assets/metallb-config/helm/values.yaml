@@ -1,0 +1,7 @@
+addressPool:
+  name: metallb-pool
+  addresses:
+    - "192.168.1.240-192.168.1.250" # Exemplo, substitua conforme necessário
+
+l2Advertisement:
+  name: empty
