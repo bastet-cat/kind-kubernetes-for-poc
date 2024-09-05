@@ -1,0 +1,21 @@
+image:
+  repository: vault-unseal
+  tag: v0
+  pullPolicy: IfNotPresent
+
+vaultSecretName: vault-keys
+vaultAddress: "http://vault.vault.svc.cluster.local:8200"
+
+schedule: "*/5 * * * *"
+
+serviceAccount:
+  create: true
+  name: cronjob-vault-unseal
+
+rbac:
+  create: true
+  roleName: vault-secret-access
+
+job:
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 0

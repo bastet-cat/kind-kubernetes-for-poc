@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: vault-unseal
+spec:
+  schedule: {{ .Values.schedule | quote }}
+  successfulJobsHistoryLimit: {{ .Values.job.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.job.failedJobsHistoryLimit }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ .Values.serviceAccount.name }}
+          containers:
+          - name: unseal
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            command: ["/bin/sh", "-c"]
+            args:
+            - |
+              for key in $(echo "$VAULT_UNSEAL_KEYS" | tr "," "\n"); do
+                vault operator unseal $key;
+              done
+            env:
+            - name: VAULT_ADDR
+              value: "{{ .Values.vaultAddress }}"
+            - name: VAULT_UNSEAL_KEYS
+              valueFrom:
+                secretKeyRef:
+                  name: vault-keys
+                  key: unseal_keys
+            envFrom:
+            - secretRef:
+                name: vault-keys
+          restartPolicy: OnFailure

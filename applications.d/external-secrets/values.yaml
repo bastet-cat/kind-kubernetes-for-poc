@@ -1,0 +1,8 @@
+vault:
+  apiVersion: v2
+  mountPath: apps
+  secretName: vault-keys
+  secretProperty: token
+  server: http://vault.vault.svc.cluster.local:8200
+
+external-secrets: {}
