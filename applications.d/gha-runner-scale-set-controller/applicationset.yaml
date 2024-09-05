@@ -19,7 +19,7 @@ spec:
       project: default
       sources:
       - repoURL: 'https://github.com/bastet-cat/kind-kubernetes-for-poc.git'
-        targetRevision: 'feat/argocd'
+        targetRevision: 'main'
         ref: values
       - repoURL: 'ghcr.io/actions/actions-runner-controller-charts'
         chart: 'gha-runner-scale-set-controller'
@@ -36,5 +36,4 @@ spec:
           prune: true
           selfHeal: true
         syncOptions:
-          - ServerSideApply=true
           - CreateNamespace=true

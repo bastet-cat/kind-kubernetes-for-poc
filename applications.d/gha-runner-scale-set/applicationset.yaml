@@ -25,10 +25,10 @@ spec:
       project: default
       sources:
       - repoURL: 'https://github.com/bastet-cat/kind-kubernetes-for-poc.git'
-        targetRevision: 'feat/argocd'
+        targetRevision: 'main'
         ref: values
       - repoURL: 'https://github.com/bastet-cat/kind-kubernetes-for-poc.git'
-        targetRevision: 'feat/argocd'
+        targetRevision: 'main'
         path: assets/gha-runner-scale-set-stne/helm
         helm:
           parameters:
@@ -45,5 +45,4 @@ spec:
         automated:
           selfHeal: true
         syncOptions:
-          - ServerSideApply=true
           - CreateNamespace=true
