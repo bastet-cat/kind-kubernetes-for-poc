@@ -26,13 +26,13 @@ default:
 # Verifica se os binários necessários estão instalados
 .PHONY: check-prerequisites
 check-prerequisites:
+	@echo '----------------------------------------------------------------------------------------------'
 	@$(foreach bin,$(REQUIRED_BINS), \
 		if ! [ -x "$(shell command -v $(bin))" ]; then \
 			echo "Error: $(bin) is not installed or not in the PATH"; \
 			exit 1; \
 		fi; \
 	)
-	@$(shell echo "----------------------------------------------------------------------------------------------$@")
 
 # Remove o cluster
 .PHONY: destroy-cluster
@@ -61,11 +61,11 @@ endif
 
 # Configura apps
 .PHONY: .setup-apps
-.setup-apps: check-prerequisites setup-vault setup-vault-unseal setup-argocd
+.setup-apps: check-prerequisites setup-vault setup-argocd
 
 .PHONY: setup-cilium
 setup-cilium: check-prerequisites
-	$(HELM) upgrade --install cilium cilium \
+	@$(HELM) upgrade --install cilium cilium \
 		--repo=https://helm.cilium.io \
 		--version 1.15.0 \
 		--namespace kube-system \
@@ -107,7 +107,7 @@ endif
 
 .PHONY: setup-ingress
 setup-ingress: check-prerequisites
-	$(HELM) upgrade --install ingress-nginx ingress-nginx \
+	@$(HELM) upgrade --install ingress-nginx ingress-nginx \
 		--repo=https://kubernetes.github.io/ingress-nginx \
 		--version 4.11.2 \
 		--namespace kube-system \
@@ -131,7 +131,7 @@ setup-ingress: check-prerequisites
 
 .PHONY: setup-vault
 setup-vault: check-prerequisites
-	$(HELM) upgrade --install vault vault \
+	@$(HELM) upgrade --install vault vault \
 		--repo=https://helm.releases.hashicorp.com \
 		--version 0.28.0 \
 		--namespace $(VAULT_NAMESPACE) \
@@ -141,55 +141,22 @@ setup-vault: check-prerequisites
 		--set server.ingress.hosts[0].host="vault$(DOMAIN)" \
 		--set ingress.hosts[0].paths[0].path="/" \
 		--set ingress.hosts[0].paths[0].pathType="Prefix"
-
-# Configura o Vault Unseal
-.PHONY: setup-vault-unseal
-setup-vault-unseal: check-prerequisites
-	$(eval POD_NAME:=$(shell $(KUBECTL) get pods --selector app.kubernetes.io/name=vault -n $(VAULT_NAMESPACE) -o jsonpath='{.items[0].metadata.name}'))
-ifeq (, $(shell $(KUBECTL) get secrets $(VAULT_SECRET_NAME) -n $(VAULT_NAMESPACE) --ignore-not-found))
-	@echo "\e[2mVerifica o vault\e[0m";
-	@until $(KUBECTL) exec -n $(VAULT_NAMESPACE) $(POD_NAME) -- vault version | grep -q "Vault"; do printf '.'; sleep 10; done; sleep 10;
-	@$(KUBECTL) exec -n $(VAULT_NAMESPACE) pod/$(POD_NAME) -- vault operator init -key-shares=5 -key-threshold=3 -format=json > init-keys.json
-	@$(KUBECTL) create secret generic $(VAULT_SECRET_NAME) -n $(VAULT_NAMESPACE) \
-		--from-literal=root_token=$$(cat init-keys.json | $(JQ) -r '.root_token') \
-		--from-literal=unseal_keys=$$(cat init-keys.json | $(JQ) -r '.unseal_keys_b64 | join(",")')
-	@rm -rf init-keys.json
-else
-	@echo "\e[1mVault already initialized\e[0m"
-endif
-	@DOCKER_BUILDKIT=1 docker build -t vault-unseal:v0 -f assets/vault-unseal/image/Dockerfile .
-	@$(KIND) load docker-image vault-unseal:v0 --name $(KIND_CLUSTER_NAME)
-
-	@echo "\e[2mAguardando a disponibilidade do vault\e[0m";
-	@until ! $(CURL) -s $(VAULT_ADDR)/v1/sys/health | grep -q 'jq: parse error'; do printf "."; sleep 10; done
-
-	@echo "\e[2mVerificando disponibilidade do kubernetes\e[0m"
-	@until kubectl get nodes &> /dev/null; do printf "."; sleep 5; done; echo "";
-
-	@$(HELM) upgrade --install vault-unseal-cronjob ./assets/vault-unseal/helm --namespace $(VAULT_NAMESPACE)
-	$(KUBECTL) create job -n $(VAULT_NAMESPACE) --from=cronjob/vault-unseal my-immediate-job
-
-	@echo "\e[2mAguardando o vault ser desbloqueado\e[0m";
-	@until ! $(CURL) -s $(VAULT_ADDR)/v1/sys/health | jq '.sealed' | grep -q 'true'; do printf "."; sleep 10; done; echo "";
-	@echo "\e[2mVault desbloqueado\e[0m"
+	@bash -c 'source ./scripts/setup-vault.sh; KIND_CLUSTER_NAME=$(KIND_CLUSTER_NAME) VAULT_URL=$(VAULT_ADDR) VAULT_SECRET_NAME=$(VAULT_SECRET_NAME) VAULT_NAMESPACE=$(VAULT_NAMESPACE) DOMAIN=$(DOMAIN) setup-vault'
 
 .PHONY: .setup-vault-env
 .setup-vault-env: check-prerequisites
-	@bash -c 'source ./scripts/setup-vault.sh; VAULT_URL=$(VAULT_ADDR) VAULT_SECRET_NAME=$(VAULT_SECRET_NAME) VAULT_NAMESPACE=$(VAULT_NAMESPACE) DOMAIN=$(DOMAIN) setup-vault'
+	@bash -c './scripts/pre-calls.sh pre-argo'
 
-	@./scripts/pre-calls.sh pre-argo
+	@$(eval JSON:=$(shell $(CURL) --retry-max-time 10 -s --request POST --data '{"password": "system"}' $(VAULT_ADDR)/v1/auth/userpass/login/system))
+	@$(eval SYSTEM_TOKEN:=$(shell echo '$(JSON)' | $(JQ) '.auth["client_token"]' | tr -d '"'))
 
-	@echo "\e[2mVerificando se o vault está disponível\e[0m"
-	@while ! $(CURL) -s --request POST --data "{\"password\": \"system\"}" "$(VAULT_ADDR)/v1/auth/userpass/login/system" | $(JQ) '.' | grep -q '"auth"'; do printf '.'; sleep 5; done; printf "\n"
-
-	$(eval LOGIN_RESPONSE:=$(shell $(CURL) -s --request POST --data "{\"password\": \"system\"}" "$(VAULT_ADDR)/v1/auth/userpass/login/system"))
-
-	$(eval SYSTEM_TOKEN:=$(shell echo '$(LOGIN_RESPONSE)' | $(JQ) '.auth["client_token"]' | tr -d '"' ))
-	$(eval SYSTEM_LONG_TOKEN:=$(shell $(CURL) -s --header "X-Vault-Token: $(SYSTEM_TOKEN)" \
+	@$(eval JSON:=$(shell $(CURL) -s --header "X-Vault-Token: $(SYSTEM_TOKEN)" \
 		--request POST \
 		--data '{ "policies": ["poweruser"], "ttl": "0" }' \
-		$(VAULT_ADDR)/v1/auth/token/create | $(JQ) '.auth["client_token"]' | tr -d '"'))
-	$(eval ARGOCD_SECRET:=$(shell openssl rand -base64 8))
+		$(VAULT_ADDR)/v1/auth/token/create))
+	@$(eval SYSTEM_LONG_TOKEN:=$(shell echo '$(JSON)' | $(JQ) '.auth["client_token"]' | tr -d '"'))
+
+	@$(eval ARGOCD_SECRET:=$(shell openssl rand -base64 8))
 
 	@if ! echo '$(shell $(CURL) -s --header "X-Vault-Token: $(SYSTEM_TOKEN)" --request GET "$(VAULT_ADDR)/v1/tools/data/argocd")' | jq '.' | grep -q 'admin-secret'; then \
 		echo "\e[34mCreating vault argo-cd secret\e[0m"; \
@@ -220,10 +187,10 @@ endif
 
 .PHONY: setup-argocd
 setup-argocd: check-prerequisites .setup-vault-env
-	$(eval LOGIN_RESPONSE:=$(shell $(CURL) -sS --request POST --data "{\"password\": \"system\"}" "$(VAULT_ADDR)/v1/auth/userpass/login/system"))
+	@$(eval LOGIN_RESPONSE:=$(shell $(CURL) -sS --request POST --data "{\"password\": \"system\"}" "$(VAULT_ADDR)/v1/auth/userpass/login/system"))
 	@if echo '$(LOGIN_RESPONSE)' | grep -q '"auth"'; then echo "\e[1mLogin successful.\e[0m"; else echo "\e[91mLogin fail.\e[0m"; fi;
-	$(eval SYSTEM_TOKEN:=$(shell echo '$(LOGIN_RESPONSE)' | $(JQ) '.auth["client_token"]'))
-	$(eval ARGOCD_SECRET:=$(shell $(CURL) -s --header "X-Vault-Token: $(SYSTEM_TOKEN)" --request GET $(VAULT_ADDR)/v1/tools/data/argocd | jq '.data.data["admin-secret"]'))
+	@$(eval SYSTEM_TOKEN:=$(shell echo '$(LOGIN_RESPONSE)' | $(JQ) '.auth["client_token"]'))
+	@$(eval ARGOCD_SECRET:=$(shell $(CURL) -s --header "X-Vault-Token: $(SYSTEM_TOKEN)" --request GET $(VAULT_ADDR)/v1/tools/data/argocd | jq '.data.data["admin-secret"]'))
 	@$(HELM) upgrade --install argo-cd argo-cd \
 		--repo=https://argoproj.github.io/argo-helm \
 		--version 7.1.3 \
