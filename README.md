@@ -84,23 +84,14 @@ CLUSTER_NAME=my-cluster LOCAL_DOMAIN=-127-0-0-1.nip.io make create-cluster
 make destroy-cluster
 ```
 
-### BUGS
+### Resumo
 
-se aparecer o erro durante a execução:
-```
-Creating vault argo-cd secret
-{
-  "errors": [
-    "permission denied"
-  ]
-}
-```
-O [argocd](http://argocd-127-0-0-1.nip.io) foi instalado com a senha *null*, entre nele com admin/null
+Instalando com:
 
-
-caso queira execute:
 ```
-LOCAL_DOMAIN=-127-0-0-1.nip.io make setup-argocd
+LOCAL_DOMAIN=-127-0-0-1.nip.io make create-cluster
 ```
 
-A senha então estará armazenada no [vault](http://vault-127-0-0-1.nip.io) em **secrets/tools/argocd**
+- [argocd](http://argocd-127-0-0-1.nip.io)
+
+- A senha do argo estará armazenada no [vault](http://vault-127-0-0-1.nip.io) em **secrets/tools/argocd**
