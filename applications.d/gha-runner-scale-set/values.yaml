@@ -40,3 +40,6 @@ global:
               mountPath: /home/runner/_work
             - name: dind-sock
               mountPath: /var/run
+    metadata:
+      annotations:
+        argocd.argoproj.io/sync-options: Prune=false
