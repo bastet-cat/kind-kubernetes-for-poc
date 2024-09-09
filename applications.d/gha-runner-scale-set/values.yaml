@@ -41,6 +41,6 @@ global:
             - name: dind-sock
               mountPath: /var/run
   listenerTemplate:
-  metadata:
-    annotations:
-      argocd.argoproj.io/compare-options: IgnoreExtraneous
+    metadata:
+      annotations:
+        argocd.argoproj.io/compare-options: IgnoreExtraneous
