@@ -19,15 +19,15 @@ spec:
       project: default
       sources:
       - repoURL: 'https://github.com/bastet-cat/kind-kubernetes-for-poc.git'
-        targetRevision: 'main'
+        targetRevision: 'feat/custom-installation-resources'
         ref: values
       - repoURL: 'ghcr.io/actions/actions-runner-controller-charts'
-        chart: 'gha-runners-controller'
+        chart: 'gha-runner-scale-set-controller'
         targetRevision: '0.9.3'
         helm:
           valueFiles:
-            - '$values/applications.d/gha-runners-controller/values.yaml'
-            - '$values/applications.d/gha-runners-controller/values-{{environment}}.yaml'
+            - '$values/applications.d/gha-runner-scale-set-controller/values.yaml'
+            - '$values/applications.d/gha-runner-scale-set-controller/values-{{environment}}.yaml'
       destination:
         server: '{{cluster}}'
         namespace: 'arc-system'
