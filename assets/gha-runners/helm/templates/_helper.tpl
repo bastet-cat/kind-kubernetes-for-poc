@@ -189,7 +189,7 @@ actions.github.com/cleanup-no-permission-service-account-name: {{ include "gha-r
   {{- if eq $val.name "runner" -}}
 image: {{ $val.image }}
 command: ["cp"]
-args: ["-r", "-v", "/home/runner/exgha-runners.dind-init-containerternals/.", "/home/runner/tmpDir/"]
+args: ["-r", "-v", "/home/runner/externals/.", "/home/runner/tmpDir/"]
 volumeMounts:
   - name: dind-externals
     mountPath: /home/runner/tmpDir

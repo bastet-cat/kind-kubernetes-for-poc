@@ -7,8 +7,6 @@ metadata:
   labels:
     {{- include "gha-runners.labels" $ | nindent 4 }}
     app.kubernetes.io/component: manager-role
-  finalizers:
-    - actions.github.com/cleanup-protection
 rules:
 - apiGroups:
   - ""
