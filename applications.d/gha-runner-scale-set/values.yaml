@@ -44,3 +44,8 @@ global:
     metadata:
       annotations:
         argocd.argoproj.io/sync-options: Prune=false
+    spec:
+      containers:
+      - name: listener
+        securityContext:
+          runAsUser: 1000
