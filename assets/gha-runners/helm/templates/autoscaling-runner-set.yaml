@@ -1,0 +1,4 @@
+{{- range $flavour := .Values.global.flavours }}
+---
+{{- template "gha-runners.autoscaling-runner-set" (list $flavour $) }}
+{{- end }}

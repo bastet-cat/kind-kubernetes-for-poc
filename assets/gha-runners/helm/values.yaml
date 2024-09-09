@@ -6,7 +6,7 @@ global:
     type: dind
   environment: stg
   externalSecret:
-    path: bastet-cat/arc-system
+    path: my-org/arc-system
   extraAnnotations:
     argocd.argoproj.io/compare-options: IgnoreExtraneous
   extraLabels: {}
@@ -15,13 +15,12 @@ global:
       cpu: 1
       memory: 1Gi
       minRunners: 0
-      maxRunners: 3
     - name: medium
       cpu: 3
       memory: 5Gi
-      minRunners: 0
       maxRunners: 2
-  githubConfigUrl: "https://github.com/bastet-cat"
+  githubConfigUrl: "https://github.com/my-org"
+  minRunners: 1
   maxRunners: 5
   org: my-org
   template:

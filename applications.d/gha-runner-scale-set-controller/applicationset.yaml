@@ -8,7 +8,7 @@ spec:
       elements:
       - cluster: https://kubernetes.default.svc
         cluster-name: bastet-cat
-        prefix: gha-runner-scale-set-controller
+        prefix: gha-runners-controller
         environment: stg
   template:
     metadata:
@@ -22,12 +22,12 @@ spec:
         targetRevision: 'main'
         ref: values
       - repoURL: 'ghcr.io/actions/actions-runner-controller-charts'
-        chart: 'gha-runner-scale-set-controller'
+        chart: 'gha-runners-controller'
         targetRevision: '0.9.3'
         helm:
           valueFiles:
-            - '$values/applications.d/gha-runner-scale-set-controller/values.yaml'
-            - '$values/applications.d/gha-runner-scale-set-controller/values-{{environment}}.yaml'
+            - '$values/applications.d/gha-runners-controller/values.yaml'
+            - '$values/applications.d/gha-runners-controller/values-{{environment}}.yaml'
       destination:
         server: '{{cluster}}'
         namespace: 'arc-system'

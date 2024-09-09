@@ -54,8 +54,8 @@ argocd repo add \
     --password SEU_PAT \
     --upsert
 
-kubectl apply -n argo-cd -f applications.d/gha-runner-scale-set-controller/applicationset.yaml
-kubectl apply -n argo-cd -f applications.d/gha-runner-scale-set/applicationset.yaml
+kubectl apply -n argo-cd -f applications.d/gha-runners-controller/applicationset.yaml
+kubectl apply -n argo-cd -f applications.d/gha-runners/applicationset.yaml
 ```
 
 ## Instale
