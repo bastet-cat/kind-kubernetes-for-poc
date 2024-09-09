@@ -19,6 +19,10 @@ global:
     - name: medium
       cpu: 3
       memory: 5Gi
+    - name: demo-repository
+      cpu: 3
+      memory: 5Gi
+      repository: demo-repository
   githubConfigUrl: "https://github.com/bastet-cat"
   maxRunners: 5
   org: my-org
