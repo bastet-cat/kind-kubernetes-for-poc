@@ -329,10 +329,10 @@ resources:
     {{- if $container.resources }}
 {{ $container.resources | toYaml | indent 2 }}
     {{ else }}
-    request:
+    requests:
       cpu: {{ (coalesce $flavour $root.Values.global).cpu }}
       memory: {{ (coalesce $flavour $root.Values.global).memory }}
-    limit:
+    limits:
       memory: {{ (coalesce $flavour $root.Values.global).memory }}
     {{- end }}
 {{- end }}
