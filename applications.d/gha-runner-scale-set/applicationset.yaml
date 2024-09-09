@@ -18,7 +18,7 @@ spec:
                 flavour: small
   template:
     metadata:
-      name: '{{name}}-runners-{{environment}}-{{flavour}}'
+      name: '{{name}}-runners-{{environment}}'
       finalizers:
       - resources-finalizer.argocd.argoproj.io
     spec:
