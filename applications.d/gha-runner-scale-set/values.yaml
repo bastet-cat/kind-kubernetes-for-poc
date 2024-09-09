@@ -40,3 +40,8 @@ global:
               mountPath: /home/runner/_work
             - name: dind-sock
               mountPath: /var/run
+
+listenerTemplate:
+  metadata:
+    annotations:
+      argocd.argoproj.io/compare-options: IgnoreExtraneous
