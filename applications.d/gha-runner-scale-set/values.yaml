@@ -41,10 +41,10 @@ global:
             - name: dind-sock
               mountPath: /var/run
   listenerTemplate:
-    metadata:
-      annotations:
-        argocd.argoproj.io/sync-options: Prune=false
     spec:
+      metadata:
+        annotations:
+          argocd.argoproj.io/sync-options: Prune=false
       containers:
       - name: listener
         securityContext:
