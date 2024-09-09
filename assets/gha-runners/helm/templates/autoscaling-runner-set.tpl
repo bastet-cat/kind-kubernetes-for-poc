@@ -21,7 +21,7 @@ spec:
   {{- end }}
   maxRunners: {{ include "gha-runners.maxRunners" . }}
   minRunners: {{ include "gha-runners.minRunners" . }}
-  {{- with $flavour.listenerTemplate}}
+  {{- with coalesce $flavour.listenerTemplate $root.Values.global.listenerTemplate }}
   listenerTemplate:
     {{- toYaml . | nindent 4}}
   {{- end }}
