@@ -7,8 +7,7 @@ global:
   environment: stg
   externalSecret:
     path: my-org/arc-system
-  extraAnnotations:
-    argocd.argoproj.io/compare-options: IgnoreExtraneous
+  extraAnnotations: {}
   extraLabels: {}
   flavours:
     - name: small
