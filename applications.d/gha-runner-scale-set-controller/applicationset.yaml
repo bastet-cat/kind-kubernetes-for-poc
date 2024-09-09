@@ -8,7 +8,7 @@ spec:
       elements:
       - cluster: https://kubernetes.default.svc
         cluster-name: bastet-cat
-        prefix: gha-runner-scale-set-controller
+        prefix: gha-runners-controller
         environment: stg
   template:
     metadata:
@@ -19,7 +19,7 @@ spec:
       project: default
       sources:
       - repoURL: 'https://github.com/bastet-cat/kind-kubernetes-for-poc.git'
-        targetRevision: 'main'
+        targetRevision: 'feat/custom-installation-resources'
         ref: values
       - repoURL: 'ghcr.io/actions/actions-runner-controller-charts'
         chart: 'gha-runner-scale-set-controller'

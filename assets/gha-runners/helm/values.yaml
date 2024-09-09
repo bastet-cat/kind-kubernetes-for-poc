@@ -6,7 +6,7 @@ global:
     type: dind
   environment: stg
   externalSecret:
-    path: bastet-cat/arc-system
+    path: my-org/arc-system
   extraAnnotations:
     argocd.argoproj.io/compare-options: IgnoreExtraneous
   extraLabels: {}
@@ -14,16 +14,13 @@ global:
     - name: small
       cpu: 1
       memory: 1Gi
-      minRunners: 1
-      maxRunners: 3
+      minRunners: 0
     - name: medium
       cpu: 3
       memory: 5Gi
-    - name: demo-repository
-      cpu: 3
-      memory: 5Gi
-      repository: demo-repository
-  githubConfigUrl: "https://github.com/bastet-cat"
+      maxRunners: 2
+  githubConfigUrl: "https://github.com/my-org"
+  minRunners: 1
   maxRunners: 5
   org: my-org
   template:
@@ -40,12 +37,3 @@ global:
               mountPath: /home/runner/_work
             - name: dind-sock
               mountPath: /var/run
-  listenerTemplate:
-    metadata:
-      annotations:
-        argocd.argoproj.io/sync-options: Prune=false
-    spec:
-      containers:
-      - name: listener
-        securityContext:
-          runAsUser: 1000

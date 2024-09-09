@@ -13,29 +13,29 @@ spec:
               elements:
               - cluster: in-cluster
                 cluster-url: https://kubernetes.default.svc
-                prefix: gha-runner-scale-set-controller
+                prefix: gha-runners-controller
                 environment: stg
                 flavour: small
   template:
     metadata:
-      name: '{{name}}-runners-{{environment}}-{{flavour}}'
+      name: '{{name}}-runners-{{environment}}'
       finalizers:
       - resources-finalizer.argocd.argoproj.io
     spec:
       project: default
       sources:
       - repoURL: 'https://github.com/bastet-cat/kind-kubernetes-for-poc.git'
-        targetRevision: 'main'
+        targetRevision: 'feat/custom-installation-resources'
         ref: values
       - repoURL: 'https://github.com/bastet-cat/kind-kubernetes-for-poc.git'
-        targetRevision: 'main'
-        path: assets/gha-runner-scale-set-stne/helm
+        targetRevision: 'feat/custom-installation-resources'
+        path: assets/gha-runners/helm
         helm:
           parameters:
-          - name: runnerScaleSet.githubConfigUrl
+          - name: global.githubConfigUrl
             value: "https://github.com/bastet-cat"
-          - name: runnerScaleSet.runnerScaleSetName
-            value: "{{ flavour }}-runner-scale-set-{{ environment }}"
+          - name: global.org
+            value: "bastet-cat"
           valueFiles:
           - '$values/applications.d/gha-runner-scale-set/values.yaml'
       destination:
@@ -48,3 +48,6 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true
+      ignoreDifferences:
+      - group: 'cilium.io'
+        kind: CiliumIdentity

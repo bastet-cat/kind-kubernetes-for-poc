@@ -6,7 +6,7 @@ else
 
   echo "Executando scripts $1"
 
-  for hook in ./scripts/$1/*; do
+  for hook in $(find ./scripts/$1 -maxdepth 1 -type f -name *.sh); do
     echo -e "\e[32mExecutando: $hook \e[0m"; "$hook" "$@";
   done
 fi
