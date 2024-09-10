@@ -25,10 +25,10 @@ spec:
       project: default
       sources:
       - repoURL: 'https://github.com/bastet-cat/kind-kubernetes-for-poc.git'
-        targetRevision: 'feat/custom-installation-resources'
+        targetRevision: 'main'
         ref: values
       - repoURL: 'https://github.com/bastet-cat/kind-kubernetes-for-poc.git'
-        targetRevision: 'feat/custom-installation-resources'
+        targetRevision: 'main'
         path: assets/gha-runners/helm
         helm:
           parameters:
