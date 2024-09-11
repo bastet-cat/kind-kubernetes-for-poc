@@ -27,6 +27,9 @@ global:
   maxRunners: 5
   org: my-org
   template:
+    # metadata:
+    #   annotations:
+    #     karpenter.sh/do-not-evict: "true"
     spec:
       containers:
         - name: runner
@@ -40,6 +43,14 @@ global:
               mountPath: /home/runner/_work
             - name: dind-sock
               mountPath: /var/run
+      # nodeSelector:
+      #   provisioner: github-self-hosted
+      #   karpenter.sh/capacity-type: on-demand
+      # tolerations:
+      #   - effect: NoSchedule
+      #     key: github-self-hosted
+      #     operator: Equal
+      #     value: 'true'
   listenerTemplate:
     spec:
       containers:
