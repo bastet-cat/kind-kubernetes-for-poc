@@ -8,6 +8,9 @@ metadata:
   labels:
     app.kubernetes.io/component: "autoscaling-runner-set"
     {{- include "gha-runners.labels" . | nindent 4 }}
+    {{- range $key, $value := $root.Values.global.extraLabels }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
   annotations:
     {{- include "gha-runners.annotations" . | nindent 4 }}
 spec:
@@ -26,7 +29,7 @@ spec:
     {{- toYaml . | nindent 4}}
   {{- end }}
   template:
-    {{- with ($flavour.template).metadata }}
+    {{- with (coalesce ($flavour.template).metadata ($root.Values.global.template).metadata) }}
     metadata:
       {{- with .labels }}
       labels:
@@ -38,12 +41,12 @@ spec:
       {{- end }}
     {{- end }}
     spec:
-      {{- range $key, $val := ($flavour.template).spec }}
+      {{- range $key, $val := (coalesce ($flavour.template).spec ($root.Values.global.template).spec) }}
         {{- if and (ne $key "containers") (ne $key "volumes") (ne $key "initContainers") (ne $key "serviceAccountName") }}
       {{ $key }}: {{ $val | toYaml | nindent 8 }}
         {{- end }}
       {{- end }}
-      {{- if not (($flavour.template).spec).restartPolicy }}
+      {{- if not (coalesce (($flavour.template).spec).restartPolicy (($root.Values.global.template).spec).restartPolicy) }}
       restartPolicy: Never
       {{- end }}
       {{- $containerMode := coalesce $flavour.containerMode $root.Values.global.containerMode }}
@@ -77,7 +80,7 @@ spec:
       {{- include "gha-runners.default-mode-runner-containers" $flavour | nindent 6 }}
       {{- end }}
       {{- $tlsConfig := (default (dict) $root.Values.global.githubServerTLS) }}
-      {{- if or ($flavour.template).spec.volumes (eq $containerMode.type "dind") (eq $containerMode.type "kubernetes") $tlsConfig.runnerMountPath }}
+      {{- if or (coalesce ($flavour.template).spec.volumes ($root.Values.global.template).spec.volumes) (eq $containerMode.type "dind") (eq $containerMode.type "kubernetes") $tlsConfig.runnerMountPath }}
       volumes:
         {{- if $tlsConfig.runnerMountPath }}
           {{- include "gha-runners.tls-volume" $tlsConfig | nindent 6 }}
@@ -90,9 +93,15 @@ spec:
           {{- include "gha-runners.kubernetes-mode-work-volume" $flavour | nindent 6 }}
           {{- include "gha-runners.non-work-volumes" $flavour | nindent 6 }}
         {{- else }}
-          {{- with (($flavour.template).spec).volumes }}
+          {{- with (coalesce (($flavour.template).spec).volumes (($root.Values.global.template).spec).volumes) }}
         {{- toYaml . | nindent 6 }}
           {{- end }}
         {{- end }}
+      {{- end }}
+      {{- with (coalesce (($flavour.template).spec).nodeSelector (($root.Values.global.template).spec).nodeSelector) }}
+        {{- toYaml . | nindent 4 }}
+      {{- end }}
+      {{- with (coalesce (($flavour.template).spec).tolerations (($root.Values.global.template).spec).tolerations) }}
+        {{- toYaml . | nindent 4 }}
       {{- end }}
 {{- end -}}
