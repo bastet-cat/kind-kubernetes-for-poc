@@ -1,0 +1,83 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: arc-scale-set-stg
+  namespace: argo-cd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - matrix:
+        generators:
+        - git:
+            repoURL: https://github.com/bastet-cat/kind-kubernetes-for-poc.git
+            revision: fix/reliable-cascading-values
+            files:
+            - path: "applications.d/gha-scale-sets/components-stg.yaml"
+        - list:
+            elements: []
+            elementsYaml: "{{ .components | toJson }}"
+  template:
+    metadata:
+      name: "{{ .owner }}-{{ .key }}-{{ .envShortName }}"
+      namespace: argo-cd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: "{{ .appProject }}"
+      sources:
+      - repoURL: "{{ .valuesRepoUrl }}"
+        targetRevision: "fix/reliable-cascading-values"
+        ref: values
+      - repoURL: "{{ .helmRepoUrl }}"
+        chart: "{{ .helmChart }}"
+        targetRevision: "{{ .helmChartVersion }}"
+        helm:
+          valueFiles:
+            - "$values/applications.d/gha-scale-sets/{{ .key }}/values.yaml"
+            - "$values/applications.d/gha-scale-sets/{{ .key }}/{{ .owner }}/values-{{ .envShortName }}.yaml"
+          parameters:
+            - name: "labels.project"
+              value: "{{ .appProject }}"
+            - name: "labels.env"
+              value: "{{ .envName }}"
+            - name: "labels.cost-center"
+              value: "{{ .labels_cost_center }}"
+            - name: "labels.owner"
+              value: "{{ .labels_owner }}"
+            - name: "labels.repository"
+              value: "{{ .labels_repository }}"
+            - name: "labels.support"
+              value: "{{ .labels_support }}"
+            - name: "labels.provisioner"
+              value: "{{ .labels_provisioner }}"
+            - name: "labels.github-org"
+              value: "{{ .labels_github_org }}"
+            - name: "labels.github-repo"
+              value: "{{ .labels_github_repo }}"
+            - name: "podLabels.cost-center"
+              value: "{{ .labels_cost_center }}"
+            - name: "podLabels.owner"
+              value: "{{ .labels_owner }}"
+            - name: "podLabels.repository"
+              value: "{{ .labels_repository }}"
+            - name: "podLabels.support"
+              value: "{{ .labels_support }}"
+            - name: "podLabels.provisioner"
+              value: "{{ .labels_provisioner }}"
+            - name: "podLabels.github-org"
+              value: "{{ .labels_github_org }}"
+            - name: "podLabels.github-repo"
+              value: "{{ .labels_github_repo }}"
+      destination:
+        name: "{{ .clusterName }}"
+        namespace: "{{ .clusterNamespace }}"
+      syncPolicy:
+        automated:
+          prune: false
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

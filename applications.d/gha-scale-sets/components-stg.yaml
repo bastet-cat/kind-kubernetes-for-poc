@@ -1,0 +1,37 @@
+x-anchors:
+  common: &common
+    appProject: default
+    clusterName: in-cluster
+    clusterNamespace: arc-system
+    envName: staging
+    envShortName: stg
+    key: gha-runner-scale-set-controller
+    labels_cost_center: "my-cost-center"
+    labels_owner: "resource-owner"
+    labels_repository: "kind-kubernetes-for-poc"
+    labels_support: "support-team-uri"
+    labels_provisioner: "my-provisioner"
+    labels_github_org: "bastet-cat"
+    labels_github_repo: "kind-kubernetes-for-poc"
+    owner: ""
+    valuesRepoUrl: 'https://github.com/bastet-cat/kind-kubernetes-for-poc.git'
+
+  controller: &controller
+    <<: *common
+    helmRepoUrl: 'ghcr.io/actions/actions-runner-controller-charts'
+    helmChart: 'gha-runner-scale-set-controller'
+    helmChartVersion: '0.9.3'
+    key: controller
+
+  runner: &runner
+    <<: *common
+    helmChartVersion: '1.0.0'
+    helmChart: 'gha-runners'
+    helmRepoUrl: 'ghcr.io/bastet-cat/kind-kubernetes-for-poc'
+    key: runners
+
+components:
+  - <<: *controller
+    owner: bastet-cat
+  - <<: *runner
+    owner: euclides

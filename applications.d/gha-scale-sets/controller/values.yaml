@@ -1,3 +1,4 @@
+---
 flags:
-    excludeLabelPropagationPrefixes:
+  excludeLabelPropagationPrefixes:
     - "argocd.argoproj.io/instance"

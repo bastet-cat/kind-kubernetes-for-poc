@@ -9,40 +9,16 @@ global:
     path: bastet-cat/arc-system
   extraAnnotations: {}
   extraLabels: {}
-  flavours:
-    - name: small
-      cpu: 1
-      memory: 1Gi
-      maxRunners: 3
-    - name: medium
-      cpu: 3
-      memory: 5Gi
-      minRunners: 1
-    - name: demo-repository
-      cpu: 3
-      memory: 5Gi
-      repository: demo-repository
+  flavours: {}
   githubConfigUrl: "https://github.com/bastet-cat"
   minRunners: 0
   maxRunners: 5
-  org: my-org
+  org: bastet-cat
   template:
     # metadata:
     #   annotations:
     #     karpenter.sh/do-not-evict: "true"
     spec:
-      containers:
-        - name: runner
-          image: ghcr.io/actions/actions-runner:latest
-          command: ["/home/runner/run.sh"]
-          env:
-            - name: DOCKER_HOST
-              value: unix:///var/run/docker.sock
-          volumeMounts:
-            - name: work
-              mountPath: /home/runner/_work
-            - name: dind-sock
-              mountPath: /var/run
       # nodeSelector:
       #   provisioner: github-self-hosted
       #   karpenter.sh/capacity-type: on-demand

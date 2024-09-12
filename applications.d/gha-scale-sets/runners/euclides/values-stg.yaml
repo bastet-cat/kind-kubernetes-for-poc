@@ -1,0 +1,40 @@
+x-anchors:
+  runnerTemplate: &runnerTemplate
+    metadata:
+      annotations:
+        owner: "euclides.okamoto"
+    containers:
+      - name: runner
+        image: ghcr.io/actions/actions-runner:latest
+        command: ["/home/runner/run.sh"]
+        env:
+          - name: DOCKER_HOST
+            value: unix:///var/run/docker.sock
+        volumeMounts:
+          - name: work
+            mountPath: /home/runner/_work
+          - name: dind-sock
+            mountPath: /var/run
+
+
+global:
+  flavours:
+    - name: small-runner-stg
+      cpu: 1
+      memory: 1Gi
+      template:
+        <<: *runnerTemplate
+    - name: medium-runner-stg
+      cpu: 3
+      memory: 7Gi
+      template:
+        <<: *runnerTemplate
+    - name: large-runner-stg
+      cpu: 5
+      memory: 32Gi
+      template:
+        <<: *runnerTemplate
+        containers:
+        - name: runner
+          image: ghcr.io/actions/actions-runner:2.319.1
+

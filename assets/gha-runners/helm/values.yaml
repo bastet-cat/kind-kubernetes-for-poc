@@ -1,58 +1,67 @@
 global:
 
-  # Controller Service Account
+  # -- Controller Service Account (can be overrided by flavours)
   controllerServiceAccount:
     namespace: arc-system
     name: bastet-cat-controller-stg-gha-rs-controller
 
-  # AutoScalingRunnerSet container mode
+  # -- AutoScalingRunnerSet container mode `dind` `kubernetes`
   containerMode:
     type: dind
 
-  # Environment composes RunnerScaleSet name
+  # -- Environment composes RunnerScaleSet name
   environment: stg
 
-  # External Secret definitions
+  # -- External Secret definitions
   externalSecret:
     path: my-org/arc-system
 
-  # Extra annotations to AutoScalingRunnerSet
+  # -- Extra annotations to AutoScalingRunnerSet
   extraAnnotations: {}
 
-  # Extra labels to AutoScalingRunnerSet
+  # -- Extra labels to AutoScalingRunnerSet
   extraLabels: {}
 
-  # Flavours
+  # -- Flavours definitions
+  # **flavours item full example:**
+  # `{ "name": "small", "cpu": 1, "memory": "1Gi", "minRunners": 1, "maxRunners": 5,
+  # "repository": "repo-name", "template": {}, "serviceAccountName": "sa", "githubServerTLS": "",
+  # "controllerServiceAccount": {}, "listenerTemplate": {}}`
   flavours:
 
     - name: small
       cpu: 1
-      memory: 1Gi
-      minRunners: 0
+      memory: 3Gi
 
     - name: medium
       cpu: 3
-      memory: 5Gi
-      maxRunners: 2
+      memory: 7Gi
 
-  # Base url github repository
+    - name: large
+      cpu: 5
+      memory: 32Gi
+
+  # -- Base url [github](https://github.com) repository
   githubConfigUrl: "https://github.com/my-org"
 
-  # Default Min Runners (can be overrided by flavours)
-  minRunners: 1
+  # -- (int) Default Min Runners (can be overrided by flavours)
+  minRunners: 0
 
-  # Default Max Runners (can be overrided by flavours)
+  # -- (int) Default Max Runners (can be overrided by flavours)
   maxRunners: 5
 
-  # Org name composes resources name
+  # -- Org name composes resources name
   org: my-org
 
-  # Default runner template
+  # -- Default runner template (can be overrided by flavours)
   template:
-    # metadata:
-    #   annotations:
-    #     karpenter.sh/do-not-evict: "true"
+    # -- (object) runner template metadata
+    # Example:
+    # { "annotations": { "karpenter\.sh/do-not-evict": "true" } }
+    metadata: {}
+    # -- runner template spec
     spec:
+      # @default -- (object[]) runner template containers
       containers:
         - name: runner
           image: ghcr.io/actions/actions-runner:latest
@@ -65,15 +74,18 @@ global:
               mountPath: /home/runner/_work
             - name: dind-sock
               mountPath: /var/run
-    # nodeSelector:
-    #   provisioner: github-self-hosted
-    #   karpenter.sh/capacity-type: on-demand
-    # tolerations:
-    #   - effect: NoSchedule
-    #     key: github-self-hosted
-    #     operator: Equal
-    #     value: 'true'
-  # Default Listener template
+    # -- (object) runner template nodeSelector
+      # Full example:
+    # { "provisioner": "github-self-hosted", "karpenter\.sh/capacity-type": "on-demand" }
+      nodeSelector:
+        provisioner: github-self-hosted
+    # -- (object) runner template tolerations
+      tolerations:
+        effect: NoSchedule
+        key: github-self-hosted
+        operator: Equal
+        value: true
+  # -- Default Listener template (can be overrided by flavours)
   listenerTemplate:
     spec:
       containers:

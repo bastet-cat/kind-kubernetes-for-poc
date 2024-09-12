@@ -43,7 +43,9 @@ gha-rs
 {{- end }}
 
 {{- define "gha-runners.scale-set-name" -}}
-{{- printf "%s-runners-%s" (include "gha-runners.resources-name-prefix" .) (include "gha-runners.resources-name-suffix" .) }}
+{{- $root := (index . 1) }}
+{{- $flavour := (index . 0) }}
+{{- $flavour.name | default "undefined" }}
 {{- end }}
 
 // fullname
@@ -75,8 +77,9 @@ actions.github.com/scale-set-namespace: {{ $root.Release.Namespace }}
 
 // Selector Labels
 {{- define "gha-runners.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "gha-runners.scale-set-name" . }}
-app.kubernetes.io/instance: {{ include "gha-runners.scale-set-name" . }}
+{{- $root := (index . 1) -}}
+app.kubernetes.io/name: {{ printf "%s-%s" (include "gha-runners.resources-name-prefix" $) (include "gha-runners.resources-name-suffix" $) }}
+app.kubernetes.io/instance: {{ printf "%s-%s-%s" (include "gha-runners.resources-name-prefix" $) $root.Release.Name (include "gha-runners.resources-name-suffix" $) }}
 {{- end }}
 
 // Annotations
@@ -183,7 +186,7 @@ actions.github.com/cleanup-no-permission-service-account-name: {{ include "gha-r
 {{- $flavour := (index . 0) }}
 {{- $root := (index . 1) }}
 {{- range $i, $val := (coalesce (($flavour.template).spec).containers (($root.Values.global.template).spec).containers) }}
-  {{- if eq $val.name "runner" -}}
+  {{- if and (kindIs "map" $val) (eq $val.name "runner") -}}
 image: {{ $val.image }}
 command: ["cp"]
 args: ["-r", "-v", "/home/runner/externals/.", "/home/runner/tmpDir/"]
@@ -239,12 +242,12 @@ volumeMounts:
 {{- $root := (index . 1) -}}
 {{- $createWorkVolume := 1 }}
   {{- range $i, $volume := (coalesce (($flavour.template).spec).volumes (($root.Values.global.template).spec).volumes) }}
-    {{- if eq $volume.name "work" }}
-      {{- $createWorkVolume = 0 }}
+    {{- if eq $volume.name "work" -}}
+      {{- $createWorkVolume = 0 -}}
 - {{ $volume | toYaml | nindent 2 }}
     {{- end }}
   {{- end }}
-  {{- if eq $createWorkVolume 1 }}
+  {{- if eq $createWorkVolume 1 -}}
 - name: work
   emptyDir: {}
   {{- end }}
@@ -285,7 +288,7 @@ volumeMounts:
 {{- define "gha-runners.non-runner-containers" -}}
 {{- $flavour := (index . 0) }}
 {{- $root := (index . 1) -}}
-  {{- range $i, $container := (coalesce (($flavour.template).spec).volumes (($root.Values.global.template).spec).containers) }}
+  {{- range $i, $container := (coalesce (($flavour.template).spec).containers (($root.Values.global.template).spec).containers) }}
     {{- if ne $container.name "runner" }}
 - {{ $container | toYaml | nindent 2 }}
     {{- end }}
@@ -295,33 +298,33 @@ volumeMounts:
 {{- define "gha-runners.non-runner-non-dind-containers" -}}
 {{- $flavour := (index . 0) }}
 {{- $root := (index . 1) -}}
-  {{- range $i, $container := (coalesce (($flavour.template).spec).volumes (($root.Values.global.template).spec).containers) }}
-    {{- if and (ne $container.name "runner") (ne $container.name "dind") }}
+  {{- range $i, $container := (coalesce (($flavour.template).spec).containers (($root.Values.global.template).spec).containers) }}
+    {{- if and (kindIs "map" $container) (ne $container.name "runner") (ne $container.name "dind") }}
 - {{ $container | toYaml | nindent 2 }}
     {{- end }}
   {{- end }}
 {{- end }}
 
 {{- define "gha-runners.dind-runner-container" -}}
-{{- $flavour := (index . 0) }}
+{{- $flavour := (index . 0) -}}
 {{- $root := (index . 1) -}}
-{{- $tlsConfig := (default (dict) ((coalesce $flavour $root.Values.global).githubServerTLS)) }}
-{{- range $i, $container := (coalesce (($flavour.template).spec).volumes (($root.Values.global.template).spec).containers) -}}
-  {{- if eq $container.name "runner" }}
-    {{- range $key, $val := $container }}
-      {{- if and (ne $key "env") (ne $key "volumeMounts") (ne $key "name") }}
+{{- $tlsConfig := default (dict) (coalesce $flavour.githubServerTLS $root.Values.global.githubServerTLS) -}}
+{{- range $i, $container := (coalesce (($flavour.template).spec).containers (($root.Values.global.template).spec).containers) -}}
+  {{- if and (kindIs "map" $container) (eq $container.name "runner") -}}
+    {{- range $key, $val := $container -}}
+{{- if and (ne $key "env") (ne $key "volumeMounts") (ne $key "name") -}}
 {{ $key }}: {{ $val | toYaml | nindent 2 }}
-      {{- end }}
-    {{- end }}
-    {{- $setDockerHost := 1 }}
-    {{- $setRunnerWaitDocker := 1 }}
-    {{- $setNodeExtraCaCerts := 0 }}
-    {{- $setRunnerUpdateCaCerts := 0 }}
-    {{- if $tlsConfig.runnerMountPath }}
-      {{- $setNodeExtraCaCerts = 1 }}
-      {{- $setRunnerUpdateCaCerts = 1 }}
-    {{- end }}
-{{- if or (coalesce $flavour.cpu $root.Values.global.cpu) (coalesce $flavour.memory $root.Values.global.memory) }}
+{{ end }}
+    {{- end -}}
+    {{- $setDockerHost := 1 -}}
+    {{- $setRunnerWaitDocker := 1 -}}
+    {{- $setNodeExtraCaCerts := 0 -}}
+    {{- $setRunnerUpdateCaCerts := 0 -}}
+    {{- if $tlsConfig.runnerMountPath -}}
+      {{- $setNodeExtraCaCerts = 1 -}}
+      {{- $setRunnerUpdateCaCerts = 1 -}}
+    {{- end -}}
+{{- if or (coalesce $flavour.cpu $root.Values.global.cpu) (coalesce $flavour.memory $root.Values.global.memory) -}}
 resources:
     {{- if $container.resources }}
 {{ $container.resources | toYaml | indent 2 }}
@@ -408,7 +411,7 @@ volumeMounts:
 {{- define "gha-runners.kubernetes-mode-runner-container" -}}
 {{- $flavour := (index . 0) }}
 {{- $root := (index . 1) }}
-{{- $tlsConfig := (default (dict) (coalesce $flavour $root.Values.global).githubServerTLS) }}
+{{- $tlsConfig := (default (dict) (coalesce $flavour.githubServerTLS $root.Values.global.githubServerTLS)) }}
 {{- range $i, $container := (coalesce (($flavour.template).spec).containers (($root.Values.global.template).spec).containers) }}
   {{- if eq $container.name "runner" }}
     {{- range $key, $val := $container }}
@@ -502,7 +505,7 @@ volumeMounts:
 {{- define "gha-runners.default-mode-runner-containers" -}}
 {{- $flavour := (index . 0) }}
 {{- $root := (index . 1) }}
-{{- $tlsConfig := (default (dict) (coalesce $flavour $root.Values.global).githubServerTLS) }}
+{{- $tlsConfig := (default (dict) (coalesce $flavour.githubServerTLS $root.Values.global.githubServerTLS)) }}
 {{- range $i, $container := (coalesce (($flavour.template).spec).containers (($root.Values.global.template).spec).containers) }}
 {{- if ne $container.name "runner" }}
 - {{ $container | toYaml | nindent 2 }}
@@ -553,7 +556,7 @@ volumeMounts:
       {{- range $i, $volMount := . }}
         {{- if eq $volMount.name "github-server-tls-cert" }}
           {{- $mountGitHubServerTLS = 0 }}
-        {{- end }}(coalesce $flavour $root.Values.global)
+        {{- end }}
     - {{ $volMount | toYaml | nindent 6 }}
       {{- end }}
     {{- end }}
@@ -579,10 +582,10 @@ volumeMounts:
 {{- $flavour := (index . 0) }}
 {{- $root := (index . 1) }}
 {{- $searchControllerDeployment := 1 }}
-{{- if (coalesce $flavour $root.Values.global).controllerServiceAccount }}
-  {{- if (coalesce $flavour $root.Values.global).controllerServiceAccount.name }}
+{{- if (coalesce $flavour.controllerServiceAccount $root.Values.global.controllerServiceAccount) }}
+  {{- if (coalesce $flavour.controllerServiceAccount.controllerServiceAccount $root.Values.global.controllerServiceAccount).name }}
     {{- $searchControllerDeployment = 0 }}
-{{- (coalesce $flavour $root.Values.global).controllerServiceAccount.name }}
+{{- (coalesce $flavour.controllerServiceAccount $root.Values.global.controllerServiceAccount).name }}
   {{- end }}
 {{- end }}
 {{- if eq $searchControllerDeployment 1 }}
@@ -638,10 +641,10 @@ volumeMounts:
 {{- $flavour := (index . 0) }}
 {{- $root := (index . 1) }}
 {{- $searchControllerDeployment := 1 }}
-{{- if (coalesce $flavour $root.Values.global).controllerServiceAccount }}
-  {{- if (coalesce $flavour $root.Values.global).controllerServiceAccount.namespace }}
+{{- if (coalesce $flavour.controllerServiceAccount $root.Values.global.controllerServiceAccount) }}
+  {{- if (coalesce $flavour.controllerServiceAccount $root.Values.global.controllerServiceAccount).namespace }}
     {{- $searchControllerDeployment = 0 }}
-{{- (coalesce $flavour $root.Values.global).controllerServiceAccount.namespace }}
+{{- (coalesce $flavour.controllerServiceAccount $root.Values.global.controllerServiceAccount).namespace }}
   {{- end }}
 {{- end }}
 {{- if eq $searchControllerDeployment 1 }}

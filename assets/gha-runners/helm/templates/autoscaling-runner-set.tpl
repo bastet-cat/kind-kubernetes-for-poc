@@ -42,7 +42,7 @@ spec:
     {{- end }}
     spec:
       {{- range $key, $val := (coalesce ($flavour.template).spec ($root.Values.global.template).spec) }}
-        {{- if and (ne $key "containers") (ne $key "volumes") (ne $key "initContainers") (ne $key "serviceAccountName") }}
+        {{- if and (ne $key "containers") (ne $key "volumes") (ne $key "nodeSelector") (ne $key "tolerations") (ne $key "initContainers") (ne $key "serviceAccountName") }}
       {{ $key }}: {{ $val | toYaml | nindent 8 }}
         {{- end }}
       {{- end }}
@@ -80,7 +80,7 @@ spec:
       {{- include "gha-runners.default-mode-runner-containers" $flavour | nindent 6 }}
       {{- end }}
       {{- $tlsConfig := (default (dict) $root.Values.global.githubServerTLS) }}
-      {{- if or (coalesce ($flavour.template).spec.volumes ($root.Values.global.template).spec.volumes) (eq $containerMode.type "dind") (eq $containerMode.type "kubernetes") $tlsConfig.runnerMountPath }}
+      {{- if or (coalesce (($flavour.template).spec).volumes (($root.Values.global.template).spec).volumes) (eq $containerMode.type "dind") (eq $containerMode.type "kubernetes") $tlsConfig.runnerMountPath -}}
       volumes:
         {{- if $tlsConfig.runnerMountPath }}
           {{- include "gha-runners.tls-volume" $tlsConfig | nindent 6 }}
@@ -98,10 +98,12 @@ spec:
           {{- end }}
         {{- end }}
       {{- end }}
-      {{- with (coalesce (($flavour.template).spec).nodeSelector (($root.Values.global.template).spec).nodeSelector) }}
-        {{- toYaml . | nindent 4 }}
+      {{- with (coalesce (($flavour.template).spec).nodeSelector (($root.Values.global.template).spec).nodeSelector) -}}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- with (coalesce (($flavour.template).spec).tolerations (($root.Values.global.template).spec).tolerations) }}
-        {{- toYaml . | nindent 4 }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
       {{- end }}
 {{- end -}}
