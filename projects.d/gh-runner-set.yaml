@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: gh-runner-set
+  namespace: argo-cd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Github Actions Controller Self Hosted Runtime project
+  sourceRepos:
+    - "https://github.com/bastet-cat/kind-kubernetes-for-poc"
+    - "ghcr.io/bastet-cat/kind-kubernetes-for-poc"
+    - "ghcr.io/actions/actions-runner-controller-charts"
+  destinations:
+
+    - namespace: arc-system
+      name: in-cluster
+
+    - namespace: arc-runners
+      name: in-cluster
+
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceBlacklist: []
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  orphanedResources:
+    warn: false
+
+  roles:
+    - name: gh-runner-set-role
+      description: Sync privileges for gh-runner-set
+      policies:
+        - p, proj:gh-runner-set:gh-runner-set, applications, *, gh-runner-set/*, allow

@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: 'https://github.com/bastet-cat/kind-kubernetes-for-poc.git'
     targetRevision: 'main'
-    path: assets/external-secrets-operator-stno/helm
+    path: assets/external-secrets-operator/helm
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: 'external-secrets'
