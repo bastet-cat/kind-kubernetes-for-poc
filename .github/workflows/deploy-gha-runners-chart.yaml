@@ -1,7 +1,10 @@
 name: Publish Helm Chart
 
 on:
+  workflow_dispatch:
   push:
+    branches:
+      - main
     paths:
       - 'assets/gha-runners/helm/**'
       - '.github/workflows/deploy-gha-runners-chart.yaml'
