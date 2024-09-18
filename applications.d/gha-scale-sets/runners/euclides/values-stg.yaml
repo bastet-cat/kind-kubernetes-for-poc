@@ -5,7 +5,7 @@ x-anchors:
         owner: "euclides.okamoto"
     containers:
       - name: runner
-        image: ghcr.io/actions/actions-runner:latest
+        image: summerwind/actions-runner-dind:v2.318.0-ubuntu-20.04-a152741
         command: ["/home/runner/run.sh"]
         env:
           - name: DOCKER_HOST

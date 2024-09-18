@@ -23,6 +23,15 @@ spec:
     metadata:
       name: "{{ .owner }}-{{ .key }}-{{ .envShortName }}"
       namespace: argo-cd
+      labels:
+        project: "{{ .appProject }}"
+        env: "{{ .envName }}"
+        cost-center: "{{ .labels_cost_center }}"
+        repository: "{{ .labels_repository }}"
+        support: "{{ .labels_support }}"
+        provisioner: "{{ .labels_provisioner }}"
+        github-org: "{{ .labels_github_org }}"
+        github-repo: "{{ .labels_github_repo }}"
       finalizers:
         - resources-finalizer.argocd.argoproj.io
     spec:
@@ -70,6 +79,20 @@ spec:
             - name: "podLabels.github-org"
               value: "{{ .labels_github_org }}"
             - name: "podLabels.github-repo"
+              value: "{{ .labels_github_repo }}"
+            - name: "global.extraLabels.cost-center"
+              value: "{{ .labels_cost_center }}"
+            - name: "global.extraLabels.owner"
+              value: "{{ .labels_owner }}"
+            - name: "global.extraLabels.repository"
+              value: "{{ .labels_repository }}"
+            - name: "global.extraLabels.support"
+              value: "{{ .labels_support }}"
+            - name: "global.extraLabels.provisioner"
+              value: "{{ .labels_provisioner }}"
+            - name: "global.extraLabels.github-org"
+              value: "{{ .labels_github_org }}"
+            - name: "global.extraLabels.github-repo"
               value: "{{ .labels_github_repo }}"
       destination:
         name: "{{ .clusterName }}"
