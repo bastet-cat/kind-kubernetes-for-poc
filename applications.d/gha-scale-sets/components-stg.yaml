@@ -2,7 +2,6 @@ x-anchors:
   common: &common
     appProject: default
     clusterName: in-cluster
-    clusterNamespace: arc-runners
     envName: staging
     envShortName: stg
     key: gha-runner-scale-set-controller
@@ -18,6 +17,7 @@ x-anchors:
 
   controller: &controller
     <<: *common
+    clusterNamespace: arc-system
     helmRepoUrl: 'ghcr.io/actions/actions-runner-controller-charts'
     helmChart: 'gha-runner-scale-set-controller'
     helmChartVersion: '0.9.3'
@@ -25,6 +25,7 @@ x-anchors:
 
   runner: &runner
     <<: *common
+    clusterNamespace: arc-runners
     helmChartVersion: '1.0.0'
     helmChart: 'gha-runners'
     helmRepoUrl: 'ghcr.io/bastet-cat/kind-kubernetes-for-poc'
