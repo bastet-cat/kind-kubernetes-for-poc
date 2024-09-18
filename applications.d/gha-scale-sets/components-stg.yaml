@@ -2,7 +2,7 @@ x-anchors:
   common: &common
     appProject: default
     clusterName: in-cluster
-    clusterNamespace: arc-system
+    clusterNamespace: arc-runners
     envName: staging
     envShortName: stg
     key: gha-runner-scale-set-controller
