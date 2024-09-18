@@ -3,18 +3,19 @@ x-anchors:
     metadata:
       annotations:
         owner: "euclides.okamoto"
-    containers:
-      - name: runner
-        image: summerwind/actions-runner-dind:v2.318.0-ubuntu-20.04-a152741
-        command: ["/home/runner/run.sh"]
-        env:
-          - name: DOCKER_HOST
-            value: unix:///var/run/docker.sock
-        volumeMounts:
-          - name: work
-            mountPath: /home/runner/_work
-          - name: dind-sock
-            mountPath: /var/run
+    spec:
+      containers:
+        - name: runner
+          image: summerwind/actions-runner-dind:v2.318.0-ubuntu-20.04-a152741
+          command: ["/home/runner/run.sh"]
+          env:
+            - name: DOCKER_HOST
+              value: unix:///var/run/docker.sock
+          volumeMounts:
+            - name: work
+              mountPath: /home/runner/_work
+            - name: dind-sock
+              mountPath: /var/run
 
 
 global:
