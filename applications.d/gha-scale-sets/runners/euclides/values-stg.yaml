@@ -11,6 +11,7 @@ global:
     - name: small-runner-stg
       cpu: 1
       memory: 1Gi
+      minRunners: 1
       template:
         <<: *runnerTemplate
     - name: medium-runner-stg
