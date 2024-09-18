@@ -77,18 +77,18 @@ global:
     # -- (object) runner template nodeSelector
       # Full example:
     # { "provisioner": "github-self-hosted", "karpenter\.sh/capacity-type": "on-demand" }
-      nodeSelector:
-        provisioner: github-self-hosted
+      nodeSelector: {}
+       # provisioner: github-self-hosted
     # -- (object) runner template tolerations
-      tolerations:
-        effect: NoSchedule
-        key: github-self-hosted
-        operator: Equal
-        value: true
+      tolerations: {}
+        # effect: NoSchedule
+        # key: github-self-hosted
+        # operator: Equal
+        # value: true
   # -- Default Listener template (can be overrided by flavours)
-  listenerTemplate:
-    spec:
-      containers:
-      - name: listener
-        securityContext:
-          runAsUser: 1000
+  listenerTemplate: {}
+    # spec:
+    #   containers:
+    #   - name: listener
+    #    securityContext:
+    #      runAsUser: 1000

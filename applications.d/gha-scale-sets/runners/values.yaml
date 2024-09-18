@@ -18,3 +18,5 @@ global:
     spec:
       containers:
       - name: listener
+        securityContext:
+          runAsUser: 1000
