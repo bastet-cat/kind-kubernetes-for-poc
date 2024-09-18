@@ -10,7 +10,11 @@ on:
 
 jobs:
   simple-test:
-    runs-on: small-runner-stg
+    strategy:
+      matrix:
+        run: [1,2]
+        runner: ["small-runner-stg", "medium-runner-stg", "large-runner-stg"]
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Check out the code
         uses: actions/checkout@v3
