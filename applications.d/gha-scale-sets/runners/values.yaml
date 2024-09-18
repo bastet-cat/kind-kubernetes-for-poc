@@ -11,7 +11,7 @@ global:
   extraLabels: {}
   flavours: {}
   githubConfigUrl: "https://github.com/bastet-cat"
-  minRunners: 0
+  minRunners: 1
   maxRunners: 5
   org: bastet-cat
   template:
