@@ -14,22 +14,4 @@ global:
   minRunners: 0
   maxRunners: 5
   org: bastet-cat
-  template:
-    # metadata:
-    #   annotations:
-    #     karpenter.sh/do-not-evict: "true"
-    spec:
-      # nodeSelector:
-      #   provisioner: github-self-hosted
-      #   karpenter.sh/capacity-type: on-demand
-      # tolerations:
-      #   - effect: NoSchedule
-      #     key: github-self-hosted
-      #     operator: Equal
-      #     value: 'true'
-  # listenerTemplate:
-  #   spec:
-  #     containers:
-  #     - name: listener
-  #       securityContext:
-  #         runAsUser: 1000
+  listenerTemplate: {}
