@@ -14,4 +14,7 @@ global:
   minRunners: 0
   maxRunners: 5
   org: bastet-cat
-  listenerTemplate: {}
+  listenerTemplate:
+    spec:
+      containers:
+      - name: listener
