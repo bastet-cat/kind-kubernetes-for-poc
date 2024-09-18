@@ -14,19 +14,19 @@ global:
       minRunners: 1
       template:
         <<: *runnerTemplate
-    - name: medium-runner-stg
-      cpu: 3
-      memory: 7Gi
-      template:
-        <<: *runnerTemplate
-    - name: large-runner-stg
-      cpu: 5
-      memory: 7Gi
-      template:
-        <<: *runnerTemplate
-        spec:
-          containers:
-          - name: runner
-            image: ghcr.io/actions/actions-runner:2.319.1
-            command: ["/home/runner/run.sh"]
+    # - name: medium-runner-stg
+    #   cpu: 3
+    #   memory: 7Gi
+    #   template:
+    #     <<: *runnerTemplate
+    # - name: large-runner-stg
+    #   cpu: 5
+    #   memory: 7Gi
+    #   template:
+    #     <<: *runnerTemplate
+    #     spec:
+    #       containers:
+    #       - name: runner
+    #         image: ghcr.io/actions/actions-runner:2.319.1
+    #         command: ["/home/runner/run.sh"]
 
