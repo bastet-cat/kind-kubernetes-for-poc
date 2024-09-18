@@ -6,8 +6,8 @@ x-anchors:
     spec:
       containers:
         - name: runner
-          image: summerwind/actions-runner-dind:v2.318.0-ubuntu-20.04-a152741
-          command: ["entrypoint-dind.sh"]
+          image: ghcr.io/actions/actions-runner:latest
+          command: ["/home/runner/run.sh"]
           env:
             - name: DOCKER_HOST
               value: unix:///var/run/docker.sock
