@@ -35,7 +35,8 @@ global:
       memory: 32Gi
       template:
         <<: *runnerTemplate
-        containers:
-        - name: runner
-          image: ghcr.io/actions/actions-runner:2.319.1
+        spec:
+          containers:
+          - name: runner
+            image: ghcr.io/actions/actions-runner:2.319.1
 
