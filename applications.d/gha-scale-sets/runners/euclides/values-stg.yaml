@@ -32,7 +32,7 @@ global:
         <<: *runnerTemplate
     - name: large-runner-stg
       cpu: 5
-      memory: 32Gi
+      memory: 7Gi
       template:
         <<: *runnerTemplate
         spec:
