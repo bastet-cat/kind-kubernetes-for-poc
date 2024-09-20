@@ -5,7 +5,7 @@ x-anchors:
     envName: staging
     envShortName: stg
     key: gha-runner-scale-set-controller
-    labels_cost_center: '123'
+    labels_cost_center: 'x123'
     labels_owner: "resource-owner"
     labels_repository: "kind-kubernetes-for-poc"
     labels_support: "support-team-uri"
