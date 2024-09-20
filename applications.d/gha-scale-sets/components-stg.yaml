@@ -1,6 +1,6 @@
 x-anchors:
   common: &common
-    appProject: default
+    appProject: gh-runner-set
     clusterName: in-cluster
     envName: staging
     envShortName: stg
